@@ -1,23 +1,51 @@
-import mongoose from 'mongoose';
-const Schema = mongoose.Schema;
+// import mongoose from 'mongoose';
+// const Schema = mongoose.Schema;
 
-const ProductSchema = new Schema({
-    chatId: {
-        type: Number,
-        required: true
-    },
-    orderId: {
-        type: Number,
-        required: true
-    },
-    nameProduct: {
-        type: String,
-        required: true
-    },
-    value: {
-        type: String,
-        required: true
+// const ProductSchema = new Schema({
+//     chatId: {
+//         type: Number,
+//         required: true
+//     },
+//     orderId: {
+//         type: Number,
+//         required: true
+//     },
+//     nameProduct: {
+//         type: String,
+//         required: true
+//     },
+//     value: {
+//         type: String,
+//         required: true
+//     }
+// });
+
+// mongoose.model('product', ProductSchema);
+
+import {EntitySchema} from "typeorm";
+
+const Product = new EntitySchema({
+    name: "Product",
+    tableName: "product",
+    columns: {
+        chatId: {
+            primary: true,
+            type: Number,
+            required: true
+        },
+        orderId: {
+            type: Number,
+            required: true
+        },
+        nameProduct: {
+            type: String,
+            required: true
+        },
+        value: {
+            type: String,
+            required: true
+        }
     }
 });
 
-mongoose.model('product', ProductSchema);
+export default Product

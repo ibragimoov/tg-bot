@@ -2,38 +2,44 @@ import { Telegraf, Markup, session } from "telegraf";
 import { Scenes } from "telegraf";
 import dotenv from 'dotenv';
 import procces from 'process';
-import mongoose from 'mongoose';
+import Order from "./models/order.model.js";
+import Product from "./models/products.model.js";
 import { buttons } from "./keyboard/buttons.js";
 import { Action } from "./constants/actions.js";
-import './models/user.model.js';
-import './models/order.model.js';
-import './models/products.model.js';
-import loginScene from './controllers/login.controller.js'
-import orderScene from './controllers/order.controller.js';
-import sendOrdersScene from './controllers/sendOrders.controller.js'
+// import loginScene from './controllers/login.controller.js'
+// import orderScene from './controllers/order.controller.js';
+// import sendOrdersScene from './controllers/sendOrders.controller.js'
 import moment from "moment";
+import typeorm from "typeorm";
 
 dotenv.config();
 
-mongoose.connect(procces.env.DB_URL, {})
-    .then(() => console.log('MongoDB connected :)'))
-    .catch((err) => console.log(err));
+const connect = () => {
+    const options = {
+        type: "mongodb",
+        url: procces.env.DB_URL,
+        synchronize: true,
+        entities: [
+            Order,
+            Product
+        ]
+    }
+  
+    return typeorm.createConnection(options)
+  }
 
-const User = mongoose.model('user');
-const Order = mongoose.model('order');
-const Product = mongoose.model('product');
 const bot = new Telegraf(procces.env.BOT_TOKEN);
 
-const stage = new Scenes.Stage(
-    [
-        loginScene,
-        orderScene,
-        sendOrdersScene
-    ]
-);
+// const stage = new Scenes.Stage(
+//     [
+//         loginScene,
+//         orderScene,
+//         sendOrdersScene
+//     ]
+// );
 
-bot.use(session());
-bot.use(stage.middleware())
+// bot.use(session());
+// bot.use(stage.middleware())
 
 bot.start((ctx) => {
     try {
@@ -224,4 +230,10 @@ bot.action('📦 Готов к выдаче', ctx => {
 bot.help((ctx) => ctx.reply('Send me a sticker'));
 bot.on('sticker', (ctx) => ctx.reply('👍'));
 bot.hears('hi', (ctx) => ctx.reply(`${ctx.message.text}`));
-bot.launch();
+
+connect()
+  .then(() => {
+    bot.launch();
+    console.log('Connected to database')
+  })
+  .catch((error) => console.log('Connect failed, error:', error))
