@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import procces from 'process';
 import Order from "./models/order.model.js";
 import Product from "./models/products.model.js";
+import User from "./models/products.model.js";
 import { buttons } from "./keyboard/buttons.js";
 import { Action } from "./constants/actions.js";
 // import loginScene from './controllers/login.controller.js'
@@ -21,7 +22,8 @@ const connect = () => {
         synchronize: true,
         entities: [
             Order,
-            Product
+            Product,
+            User
         ]
     }
   
