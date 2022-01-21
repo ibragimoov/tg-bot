@@ -21,9 +21,10 @@ const loginScene = new Scenes.WizardScene('loginScene',
         }
         if (await phoneSchema.isValid(ctx.wizard.state.phone)) {
             const userRep = typeorm.getMongoRepository(Users, 'adelace')
-            console.log(ctx.wizard.state.phone)
             await ctx.reply('Анализирую базу данных. . .');
-            await userRep.findAndCount({phone: ctx.wizard.state.phone}, (err, count) => {
+            let phone = ctx.wizard.state.phone
+            phone = Number(phone.slice(1, 12))
+            await userRep.count({phone: phone}, (err, count) => {
                 if (count > 0) {
                     ctx.reply('Доступ к приложению открыт', 
                     Markup.keyboard(buttons.MAIN_MENU)
@@ -32,11 +33,11 @@ const loginScene = new Scenes.WizardScene('loginScene',
                     return ctx.scene.leave();
                 }
                 else {
-                    userRep.insertMany(
-                        { 
+                    userRep.insertOne(
+                        {
                         chatId: ctx.from.id, 
                         name: ctx.from.first_name, 
-                        phone: ctx.wizard.state.phone
+                        phone: phone
                         }
                         ).then(function(){
                         console.log("Data inserted")
@@ -52,7 +53,7 @@ const loginScene = new Scenes.WizardScene('loginScene',
                     // .resize());
                     // ctx.scene.leave();
                 }
-            }).clone();
+            })
         } else {
             ctx.replyWithHTML('<b>Error</b>: номер телефона записан <i>неправильно</i>')
         }
