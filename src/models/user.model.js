@@ -1,8 +1,8 @@
 import {EntitySchema} from "typeorm";
 
-const Product = new EntitySchema({
-    name: "User",
-    tableName: "user",
+const Users = new EntitySchema({
+    name: "Users",
+    tableName: "users",
     columns: {
         chatId: {
             primary: true,
@@ -20,4 +20,4 @@ const Product = new EntitySchema({
     }
 });
 
-export default User
+export default Users

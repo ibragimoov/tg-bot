@@ -4,10 +4,10 @@ import dotenv from 'dotenv';
 import procces from 'process';
 import Order from "./models/order.model.js";
 import Product from "./models/products.model.js";
-import User from "./models/products.model.js";
+import Users from "./models/user.model.js";
 import { buttons } from "./keyboard/buttons.js";
 import { Action } from "./constants/actions.js";
-// import loginScene from './controllers/login.controller.js'
+import loginScene from './controllers/login.controller.js'
 // import orderScene from './controllers/order.controller.js';
 // import sendOrdersScene from './controllers/sendOrders.controller.js'
 import moment from "moment";
@@ -17,31 +17,34 @@ dotenv.config();
 
 const connect = () => {
     const options = {
+        name: "adelace",
         type: "mongodb",
         url: procces.env.DB_URL,
+        useNewUrlParser: true,
         synchronize: true,
+        logging: true,
         entities: [
             Order,
             Product,
-            User
-        ]
+            Users
+        ],
     }
-  
+
     return typeorm.createConnection(options)
   }
 
 const bot = new Telegraf(procces.env.BOT_TOKEN);
 
-// const stage = new Scenes.Stage(
-//     [
-//         loginScene,
-//         orderScene,
-//         sendOrdersScene
-//     ]
-// );
+const stage = new Scenes.Stage(
+    [
+        loginScene,
+        // orderScene,
+        // sendOrdersScene
+    ]
+);
 
-// bot.use(session());
-// bot.use(stage.middleware())
+bot.use(session());
+bot.use(stage.middleware())
 
 bot.start((ctx) => {
     try {
@@ -231,10 +234,13 @@ bot.action('📦 Готов к выдаче', ctx => {
 
 bot.help((ctx) => ctx.reply('Send me a sticker'));
 bot.on('sticker', (ctx) => ctx.reply('👍'));
-bot.hears('hi', (ctx) => ctx.reply(`${ctx.message.text}`));
+bot.hears('hi', (ctx) => {
+    ctx.reply(`${ctx.message.text}`)
+});
 
 connect()
   .then(() => {
+    bot.use(stage.middleware())
     bot.launch();
     console.log('Connected to database')
   })

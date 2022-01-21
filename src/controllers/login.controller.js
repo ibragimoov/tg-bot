@@ -1,10 +1,8 @@
 import { Markup, Scenes } from 'telegraf';
 import { phoneSchema } from './user.controller.js';
 import { buttons } from "../keyboard/buttons.js";
-import mongoose from 'mongoose'
-import '../models/user.model.js'
-
-const User = mongoose.model('user');
+import Users from '../models/user.model.js';
+import typeorm from 'typeorm'
 
 const loginScene = new Scenes.WizardScene('loginScene', 
     async (ctx) => {
@@ -22,8 +20,10 @@ const loginScene = new Scenes.WizardScene('loginScene',
             return ctx.scene.leave()
         }
         if (await phoneSchema.isValid(ctx.wizard.state.phone)) {
+            const userRep = typeorm.getMongoRepository(Users, 'adelace')
+            console.log(ctx.wizard.state.phone)
             await ctx.reply('Анализирую базу данных. . .');
-            await User.countDocuments({phone: ctx.wizard.state.phone}, (err, count) => {
+            await userRep.findAndCount({phone: ctx.wizard.state.phone}, (err, count) => {
                 if (count > 0) {
                     ctx.reply('Доступ к приложению открыт', 
                     Markup.keyboard(buttons.MAIN_MENU)
@@ -32,7 +32,7 @@ const loginScene = new Scenes.WizardScene('loginScene',
                     return ctx.scene.leave();
                 }
                 else {
-                    User.insertMany(
+                    userRep.insertMany(
                         { 
                         chatId: ctx.from.id, 
                         name: ctx.from.first_name, 
