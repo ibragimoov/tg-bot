@@ -1,13 +1,9 @@
 import { Markup, Scenes } from 'telegraf';
 import { buttons } from "../keyboard/buttons.js";
-import mongoose from 'mongoose';
-import '../models/user.model.js'
-import '../models/order.model.js';
-import '../models/products.model.js';
+import typeorm from 'typeorm'
+import Order from '../models/order.model.js';
+import Product from '../models/products.model.js';
 
-const Order = mongoose.model('order');
-const User = mongoose.model('user');
-const Product = mongoose.model('product');
 const product = [];
 
 const orderScene = new Scenes.WizardScene('orderScene',
@@ -48,6 +44,8 @@ const orderScene = new Scenes.WizardScene('orderScene',
     },
     async (ctx) => {
         ctx.wizard.state.reply = ctx.message.text;
+        const orderRep = typeorm.getMongoRepository(Order, "adelace")
+        const productRep = typeorm.getMongoRepository(Product, "adelace")
         if (await ctx.wizard.state.reply =='👈 в главное меню') {
             ctx.reply('Главное меню', 
             Markup.keyboard(buttons.MAIN_MENU)
@@ -63,7 +61,7 @@ const orderScene = new Scenes.WizardScene('orderScene',
                 nameProduct: ctx.wizard.state.nameOrder,
                 value: ctx.wizard.state.amount
             })
-            Order.insertMany(
+            orderRep.insertOne(
                 {
                     chatId: ctx.wizard.state.chatId,
                     status: 'Новый',
@@ -74,7 +72,7 @@ const orderScene = new Scenes.WizardScene('orderScene',
             });
 
             product.forEach(products => {
-                Product.insertMany({
+                productRep.insertOne({
                     chatId: products.chatId,
                     orderId: ctx.wizard.state.orderId,
                     nameProduct: products.nameProduct,

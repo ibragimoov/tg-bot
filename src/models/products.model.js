@@ -2,7 +2,7 @@ import {EntitySchema} from "typeorm";
 
 const Product = new EntitySchema({
     name: "Product",
-    tableName: "product",
+    tableName: "products",
     columns: {
         chatId: {
             primary: true,

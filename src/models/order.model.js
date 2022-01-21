@@ -1,8 +1,9 @@
 import {EntitySchema} from "typeorm";
+import UpdateDateColumn from 'typeorm'
 
 const Order = new EntitySchema({
     name: "Order",
-    tableName: "order",
+    tableName: "orders",
     columns: {
         chatId: {
             primary: true,
@@ -10,7 +11,7 @@ const Order = new EntitySchema({
             required: true
         },
         orderId: {
-            type: Number,
+            type: 'number',
             required: true
         },
         status: {
@@ -19,6 +20,16 @@ const Order = new EntitySchema({
         },
         amount: {
             type: Number
+        },
+        createAt: {
+            type: Date,
+            update: true,
+            updateDate: true,
+            UpdateDateColumn: true
+        },
+        updatedAt: {
+            type: Date,
+            update: true
         }
     }
 });

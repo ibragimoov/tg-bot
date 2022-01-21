@@ -8,7 +8,7 @@ import Users from "./models/user.model.js";
 import { buttons } from "./keyboard/buttons.js";
 import { Action } from "./constants/actions.js";
 import loginScene from './controllers/login.controller.js'
-// import orderScene from './controllers/order.controller.js';
+import orderScene from './controllers/order.controller.js';
 // import sendOrdersScene from './controllers/sendOrders.controller.js'
 import moment from "moment";
 import typeorm from "typeorm";
@@ -21,6 +21,9 @@ const connect = () => {
         type: "mongodb",
         url: procces.env.DB_URL,
         useNewUrlParser: true,
+        useFindAndModify: false,
+        useUnifiedTopology: true,
+        useCreateIndex: true,
         synchronize: true,
         logging: true,
         entities: [
@@ -38,7 +41,7 @@ const bot = new Telegraf(procces.env.BOT_TOKEN);
 const stage = new Scenes.Stage(
     [
         loginScene,
-        // orderScene,
+        orderScene,
         // sendOrdersScene
     ]
 );
@@ -99,8 +102,16 @@ bot.hears(Action.MAIN_MENU, ctx => {
 })
 
 bot.hears(Action.VIEW_ORDERS, async ctx => {
-    const user = await User.findOne({chatId: ctx.chat.id})
-    await sendOrderByQuery(ctx, ctx.chat.id, {chatId: user.chatId})
+    const chatId = ctx.chat.id
+    console.log(ctx.chat.id)
+
+
+    // const userRep = typeorm.getMongoRepository(Users, 'adelace')
+    // const user = userRep.findOne({where: {
+    //     chatId: {$eq: ctx.chat.id}}})
+    // ctx.reply(user)
+
+    sendOrderByQuery(ctx, chatId)
 })
 
 bot.hears(Action.BUTTON_MAIN_MENU, ctx => {
@@ -145,9 +156,10 @@ bot.hears(/c/, async ctx => {
     }
 })
 
-function sendOrderByQuery(ctx, chatId, query) {
+function sendOrderByQuery(ctx, chatId) {
     let html;
-    Order.find(query).then(async orders => {
+    const orderRep = typeorm.getMongoRepository(Order, 'adelace')
+    orderRep.find({ where: { chatId: ctx.chat.id} }).then(async orders => {
         let count = 0;
         html = orders.map ((f, i) => {
             count++;
@@ -156,12 +168,15 @@ function sendOrderByQuery(ctx, chatId, query) {
 
         html += `\n=============================\n\n<b><i>📮Всего заказов:</i></b> ${count}`
         await ctx.replyWithHTML(html)
+    }).catch((e) => {
+        console.log(e)
     });
 }
 
 function sendProductByQuery(ctx, chatId, query) {
     let html;
-    Product.find(query).then(async product => {
+    const productRep = typeorm.getMongoRepository(Product, "adelace")
+    productRep.find({where: {chatId: chatId}}).then(async product => {
         let count = 0;
         html = product.map ((f, i) => {
             count++;
