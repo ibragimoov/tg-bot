@@ -9,7 +9,7 @@ import { buttons } from "./keyboard/buttons.js";
 import { Action } from "./constants/actions.js";
 import loginScene from './controllers/login.controller.js'
 import orderScene from './controllers/order.controller.js';
-// import sendOrdersScene from './controllers/sendOrders.controller.js'
+import sendOrdersScene from './controllers/sendOrders.controller.js'
 import moment from "moment";
 import typeorm from "typeorm";
 
@@ -42,7 +42,7 @@ const stage = new Scenes.Stage(
     [
         loginScene,
         orderScene,
-        // sendOrdersScene
+        sendOrdersScene
     ]
 );
 
@@ -124,7 +124,7 @@ bot.hears(/c/, async ctx => {
 
     if (ctx.chat.id < 0) {
         let html;
-        productRep.find({orderId: orderId}).then(async product => {
+        productRep.find({orderId: Number(orderId)}).then(async product => {
             let count = 0,
             user_id;
             html = product.map ((f, i) => {
@@ -167,10 +167,10 @@ function sendOrderByQuery(ctx, chatId) {
     });
 }
 
-function sendProductByQuery(ctx, id) {
+function sendProductByQuery(ctx, orderId) {
     let html;
     const productRep = typeorm.getMongoRepository(Product, "adelace")
-    productRep.find({ where: { orderId: id} }).then(async product => {
+    productRep.find({where: {orderId: Number(orderId)}}).then(async product => {
         let count = 0;
         html = product.map ((f, i) => {
             count++;
@@ -183,6 +183,7 @@ function sendProductByQuery(ctx, id) {
 }
 
 bot.action('✔️ Принять', ctx => {
+    const orderRep = typeorm.getMongoRepository(Order, "adelace")
     const msg = ctx.callbackQuery.message.text
     let user_id = msg.substring(msg.indexOf('-') + 1)
     let order_id = msg.substring(msg.indexOf('+') + 1)
@@ -191,7 +192,7 @@ bot.action('✔️ Принять', ctx => {
         ctx.answerCbQuery('Заказ принят')
         ctx.telegram.sendMessage(user_id, 'Торговец принял ваш заказ\nОбновляю статус заказов. . .')
 
-        Order.updateMany({orderId: order_id},
+        orderRep.updateMany({orderId: order_id},
             {
                 $set: {
                     status: 'В обработке'
@@ -220,6 +221,7 @@ bot.action('❌ Отменить', ctx => {
 })
 
 bot.action('📦 Готов к выдаче', ctx => {
+    const orderRep = typeorm.getMongoRepository(Order, "adelace")
     const msg = ctx.callbackQuery.message.text
     let user_id = msg.substring(msg.indexOf('-') + 1)
     let order_id = msg.substring(msg.indexOf('+') + 1)
@@ -228,7 +230,7 @@ bot.action('📦 Готов к выдаче', ctx => {
         ctx.answerCbQuery('Заказ готов к выдаче')
         ctx.telegram.sendMessage(user_id, 'Торговец готов выдать товар\nОбновляю статус заказов. . .')
 
-        Order.updateMany({orderId: order_id},
+        orderRep.updateMany({orderId: Number(order_id)},
             {
                 $set: {
                     status: 'Готов к выдаче'

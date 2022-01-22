@@ -1,17 +1,18 @@
 import { Scenes, Markup } from 'telegraf';
-import mongoose from 'mongoose';
 import moment from 'moment';
-
-const User = mongoose.model('user');
-const Order = mongoose.model('order');
+import typeorm from 'typeorm'
+import Users from '../models/user.model.js';
+import Order from '../models/order.model.js';
 
 const sendOrdersScene = new Scenes.WizardScene('sendOrdersScene',
     async (ctx) => {
-        const user = await User.findOne({chatId: ctx.from.id})
+        const userRep = typeorm.getMongoRepository(Users, "adelace")
+        const orderRep = typeorm.getMongoRepository(Order, "adelace")
+        const user = await userRep.findOne({chatId: ctx.from.id})
         let html,
             text = `\n=========================\n\nЗаказчик:   ${user.name}\nID пользователя: -${ctx.chat.id}\n`
 
-        Order.find({chatId: ctx.from.id, status: 'Новый'}).then(async orders => {
+        orderRep.find({chatId: ctx.from.id, status: 'Новый'}).then(async orders => {
             let count = 0;
             html = orders.map ((f, i) => {
                 count++;
