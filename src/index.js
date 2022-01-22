@@ -153,18 +153,26 @@ bot.hears(/c/, async ctx => {
 function sendOrderByQuery(ctx, chatId) {
     let html;
     const orderRep = typeorm.getMongoRepository(Order, 'adelace')
-    orderRep.find({ where: { chatId: chatId} }).then(async orders => {
-        let count = 0;
-        html = orders.map ((f, i) => {
-            count++;
-            return `=============================\n <b>Заказ #${i + 1}</b>\n <b>✅Статус:</b> ${f.status}\n <b>📅Обновлено:</b> ${moment(f.createdAt).format('DD.MM.YYYY, h:mm')}\n <b>🔎Подробнее:</b> /c${f.orderId}`;
-        }).join('\n');
 
-        html += `\n=============================\n\n<b><i>📮Всего заказов:</i></b> ${count}`
-        await ctx.replyWithHTML(html)
-    }).catch((e) => {
-        console.log(e)
-    });
+    orderRep.count({chatId: ctx.from.id}, (err, count) => {
+        if (count == 0) {
+            ctx.reply('Нет заказов')
+        }
+        else {
+            orderRep.find({ where: { chatId: chatId} }).then(async orders => {
+                let count = 0;
+                html = orders.map ((f, i) => {
+                    count++;
+                    return `=============================\n <b>Заказ #${i + 1}</b>\n <b>✅Статус:</b> ${f.status}\n <b>📅Обновлено:</b> ${moment(f.createdAt).format('DD.MM.YYYY, h:mm')}\n <b>🔎Подробнее:</b> /c${f.orderId}`;
+                }).join('\n');
+        
+                html += `\n=============================\n\n<b><i>📮Всего заказов:</i></b> ${count}`
+                await ctx.replyWithHTML(html)
+            }).catch((e) => {
+                console.log(e)
+            });
+        }
+    })
 }
 
 function sendProductByQuery(ctx, orderId) {

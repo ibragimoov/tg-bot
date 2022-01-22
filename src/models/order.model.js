@@ -24,8 +24,6 @@ const Order = new EntitySchema({
         createAt: {
             type: Date,
             update: true,
-            updateDate: true,
-            UpdateDateColumn: true
         },
         updatedAt: {
             type: Date,
