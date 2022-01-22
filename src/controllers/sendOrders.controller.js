@@ -23,7 +23,7 @@ const sendOrdersScene = new Scenes.WizardScene('sendOrdersScene',
                     let count = 0;
                     html = orders.map ((f, i) => {
                         count++;
-                        return `=========================\n Заказ #${i + 1}\n ✅Статус: ${f.status}\n 📅Обновлен: ${moment(f.updatedAt).format('DD.MM.YYYY')}\n 🔎Подробнее: /c${f.orderId}`;
+                        return `=========================\n Заказ #${i + 1}\n ✅Статус: ${f.status}\n 📅Обновлен: ${moment(f.updatedAt).format('DD.MM.YYYY HH:MM')}\n 🔎Подробнее: /c${f.orderId}`;
                     }).join('\n');
         
                     html += text

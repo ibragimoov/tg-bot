@@ -21,12 +21,13 @@ const Order = new EntitySchema({
         amount: {
             type: Number
         },
-        createAt: {
+        createdAt: {
             type: Date,
-            update: true,
+            createDate: true
         },
         updatedAt: {
-            type: Date,
+            type: new Date(),
+            updateDate: true,
             update: true
         }
     }

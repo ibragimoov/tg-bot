@@ -149,6 +149,21 @@ bot.hears(/c/, async ctx => {
     }
 })
 
+bot.hears(/d/, async ctx => {
+    let orderId = ctx.message.text;
+    orderId = orderId.substring(2, 5);
+    const orderRep = typeorm.getMongoRepository(Order, 'adelace')
+
+    ctx.reply(`Подтверждение на удаление заказа №${orderId}`, 
+    Markup.inlineKeyboard(
+        [
+            [
+                {text: 'Да, удалить', callback_data: 'Да, удалить'}, {text: 'Отменить', callback_data: 'Отменить'}
+            ]
+        ]
+    ))
+})
+
 function sendOrderByQuery(ctx, chatId) {
     let html;
     const orderRep = typeorm.getMongoRepository(Order, 'adelace')
@@ -162,7 +177,7 @@ function sendOrderByQuery(ctx, chatId) {
                 let count = 0;
                 html = orders.map ((f, i) => {
                     count++;
-                    return `=============================\n <b>Заказ #${i + 1}</b>\n <b>✅Статус:</b> ${f.status}\n <b>📅Обновлено:</b> ${moment(f.createdAt).format('DD.MM.YYYY, h:mm')}\n <b>🔎Подробнее:</b> /c${f.orderId}`;
+                    return `=============================\n <b>Заказ #${i + 1}</b>\n <b>✅Статус:</b> ${f.status}\n <b>📅Обновлено:</b> ${moment(f.updatedAt).format('DD.MM.YYYY, HH:MM')}\n <b>🔎Подробнее:</b> /c${f.orderId}\n\n <b>❎Удалить: /d${f.orderId}</b>`;
                 }).join('\n');
         
                 html += `\n=============================\n\n<b><i>📮Всего заказов:</i></b> ${count}`
@@ -248,6 +263,18 @@ bot.action('📦 Готов к выдаче', ctx => {
         ctx.answerCbQuery('Ты не торговец', ctx.from.id)
         ctx.reply(`${ctx.from.first_name}, Ты не торговец`)
     }
+})
+
+bot.action('Да, удалить', ctx => {
+    const msg = ctx.callbackQuery.message.text
+    const orderRep = typeorm.getMongoRepository(Order, 'adelace')
+    let orderId = msg.substring(msg.indexOf('№') + 1)
+    orderRep.findOneAndDelete({orderId: Number(orderId)})
+    ctx.reply('Заказ успешно удалён')
+})
+
+bot.action('Отменить', ctx => {
+    ctx.reply('Удаление заказа отменено')
 })
 
 bot.help((ctx) => ctx.reply('Send me a sticker'));
