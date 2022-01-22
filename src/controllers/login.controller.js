@@ -48,10 +48,6 @@ const loginScene = new Scenes.WizardScene('loginScene',
                         }).catch(function(error){
                         console.log(error);
                         });
-                    // ctx.reply('Номер телефона зарегистрирован\nОткрываю доступ к приложению. . .',
-                    // Markup.keyboard(buttons.MAIN_MENU)
-                    // .resize());
-                    // ctx.scene.leave();
                 }
             })
         } else {
