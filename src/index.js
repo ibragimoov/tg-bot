@@ -118,7 +118,6 @@ bot.hears(/c/, async ctx => {
     orderId = orderId.substring(2, 5);
     const productRep = typeorm.getMongoRepository(Product, 'adelace')
     if (ctx.chat.id > 0) {
-        ctx.reply(orderId)
         sendProductByQuery(ctx, orderId)
     }
 
