@@ -103,14 +103,6 @@ bot.hears(Action.MAIN_MENU, ctx => {
 
 bot.hears(Action.VIEW_ORDERS, async ctx => {
     const chatId = ctx.chat.id
-    console.log(ctx.chat.id)
-
-
-    // const userRep = typeorm.getMongoRepository(Users, 'adelace')
-    // const user = userRep.findOne({where: {
-    //     chatId: {$eq: ctx.chat.id}}})
-    // ctx.reply(user)
-
     sendOrderByQuery(ctx, chatId)
 })
 
@@ -124,13 +116,15 @@ bot.hears(Action.BUTTON_MAIN_MENU, ctx => {
 bot.hears(/c/, async ctx => {
     let orderId = ctx.message.text;
     orderId = orderId.substring(2, 5);
+    const productRep = typeorm.getMongoRepository(Product, 'adelace')
     if (ctx.chat.id > 0) {
-        sendProductByQuery(ctx, ctx.chat.id, {orderId: orderId})
+        ctx.reply(orderId)
+        sendProductByQuery(ctx, orderId)
     }
 
     if (ctx.chat.id < 0) {
         let html;
-        Product.find({orderId: orderId}).then(async product => {
+        productRep.find({orderId: orderId}).then(async product => {
             let count = 0,
             user_id;
             html = product.map ((f, i) => {
@@ -159,7 +153,7 @@ bot.hears(/c/, async ctx => {
 function sendOrderByQuery(ctx, chatId) {
     let html;
     const orderRep = typeorm.getMongoRepository(Order, 'adelace')
-    orderRep.find({ where: { chatId: ctx.chat.id} }).then(async orders => {
+    orderRep.find({ where: { chatId: chatId} }).then(async orders => {
         let count = 0;
         html = orders.map ((f, i) => {
             count++;
@@ -173,10 +167,10 @@ function sendOrderByQuery(ctx, chatId) {
     });
 }
 
-function sendProductByQuery(ctx, chatId, query) {
+function sendProductByQuery(ctx, id) {
     let html;
     const productRep = typeorm.getMongoRepository(Product, "adelace")
-    productRep.find({where: {chatId: chatId}}).then(async product => {
+    productRep.find({ where: { orderId: id} }).then(async product => {
         let count = 0;
         html = product.map ((f, i) => {
             count++;
