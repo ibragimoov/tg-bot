@@ -177,7 +177,7 @@ function sendOrderByQuery(ctx, chatId) {
                 let count = 0;
                 html = orders.map ((f, i) => {
                     count++;
-                    return `=============================\n <b>Заказ #${i + 1}</b>\n <b>✅Статус:</b> ${f.status}\n <b>📅Обновлено:</b> ${moment(f.updatedAt).format('DD.MM.YYYY, HH:MM')}\n <b>🔎Подробнее:</b> /c${f.orderId}\n\n <b>❎Удалить: /d${f.orderId}</b>`;
+                    return `=============================\n <b>Заказ #${i + 1}</b>\n <b>✅Статус:</b> ${f.status}\n <b>📅Обновлено:</b> ${moment(f.updatedAt).format('DD.MM.YYYY, HH:mm')}\n <b>🔎Подробнее:</b> /c${f.orderId}\n\n <b>❎Удалить: /d${f.orderId}</b>`;
                 }).join('\n');
         
                 html += `\n=============================\n\n<b><i>📮Всего заказов:</i></b> ${count}`
@@ -214,12 +214,13 @@ bot.action('✔️ Принять', ctx => {
         ctx.answerCbQuery('Заказ принят')
         ctx.telegram.sendMessage(user_id, 'Торговец принял ваш заказ\nОбновляю статус заказов. . .')
 
-        orderRep.updateMany({orderId: order_id},
+        orderRep.updateMany({orderId: Number(order_id)},
             {
                 $set: {
-                    status: 'В обработке'
+                    status: 'В обработке',
+                    updatedAt: new Date()
                 }
-            }).then(console.log('upd: status'))
+            })
         
         ctx.pinChatMessage(ctx.callbackQuery.message.message_id)
 
@@ -255,9 +256,10 @@ bot.action('📦 Готов к выдаче', ctx => {
         orderRep.updateMany({orderId: Number(order_id)},
             {
                 $set: {
-                    status: 'Готов к выдаче'
+                    status: 'Готов к выдаче',
+                    updatedAt: new Date()
                 }
-            }).then(console.log('upd: status'))
+            })
 
     } else {
         ctx.answerCbQuery('Ты не торговец', ctx.from.id)

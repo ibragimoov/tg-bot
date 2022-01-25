@@ -65,7 +65,9 @@ const orderScene = new Scenes.WizardScene('orderScene',
                 {
                     chatId: ctx.wizard.state.chatId,
                     status: 'Новый',
-                    orderId: ctx.wizard.state.orderId
+                    orderId: ctx.wizard.state.orderId,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                 }
             ).catch(function(error){
             console.log(error);

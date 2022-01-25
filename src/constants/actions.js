@@ -5,6 +5,7 @@ export const Action = {
     SEND_ORDER: '📤 Отправить заказ',
     CONTINUE: '📝 Добавить ещё товар',
     REGISTRATION: '📍 Регистрация',
+    
     LOGIN: '👤 Авторизация',
     BACK: '👈 Назад',
     DENY_EDIT: '❌ Отмена редактирования',

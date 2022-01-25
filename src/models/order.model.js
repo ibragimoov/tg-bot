@@ -1,5 +1,4 @@
 import {EntitySchema} from "typeorm";
-import UpdateDateColumn from 'typeorm'
 
 const Order = new EntitySchema({
     name: "Order",
@@ -23,12 +22,9 @@ const Order = new EntitySchema({
         },
         createdAt: {
             type: Date,
-            createDate: true
         },
         updatedAt: {
-            type: new Date(),
-            updateDate: true,
-            update: true
+            type: Date
         }
     }
 });
