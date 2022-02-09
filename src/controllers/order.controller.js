@@ -54,7 +54,7 @@ const orderScene = new Scenes.WizardScene('orderScene',
             return ctx.scene.leave()
         }
 
-        if (await ctx.wizard.state.reply == '📤 Отправить заказ') {
+        if (await ctx.wizard.state.reply == '📤 Записать заказ') {
             ctx.wizard.state.orderId = Math.floor(Math.random() * (999 - 100 + 1) ) + 100;
             product.push({
                 chatId: ctx.wizard.state.chatId, 

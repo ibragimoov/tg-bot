@@ -212,7 +212,12 @@ bot.action('✔️ Принять', ctx => {
     
     if (ctx.from.id == 258752149) {
         ctx.answerCbQuery('Заказ принят')
-        ctx.telegram.sendMessage(user_id, 'Торговец принял ваш заказ\nОбновляю статус заказов. . .')
+        ctx.telegram.sendMessage(user_id, `Обновляю статус заказов. . .\nТорговец принял ваш заказ №${order_id}`,
+        Markup.inlineKeyboard(
+            [
+                {text: 'Окей, принял!', callback_data: 'Окей, принял!'}
+            ]
+        ))
 
         orderRep.updateMany({orderId: Number(order_id)},
             {
@@ -277,6 +282,12 @@ bot.action('Да, удалить', ctx => {
 
 bot.action('Отменить', ctx => {
     ctx.reply('Удаление заказа отменено')
+})
+
+bot.action('Окей, принял!', ctx => {
+    const msg = ctx.callbackQuery.message.text
+    let order_id = msg.substring(msg.indexOf('№') + 1)
+    ctx.telegram.sendMessage('-1001756421815', `Заказчик: ${ctx.chat.first_name}\nПринял заказ №${order_id}`)
 })
 
 bot.help((ctx) => ctx.reply('Send me a sticker'));
