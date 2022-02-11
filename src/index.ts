@@ -5,7 +5,7 @@ import procces from 'process';
 // import Order from "./models/order.model.js";
 // import Product from "./models/products.model.js";
 // import Users from "./models/user.model.js";
-// import { buttons } from "./keyboard/buttons.js";
+import { Buttons } from "./keyboard/buttons";
 import { Action } from "./constants/actions.js";
 // import loginScene from './controllers/login.controller.js'
 // import orderScene from './controllers/order.controller.js';
@@ -35,6 +35,7 @@ const connect = () => {
   }
 
 class Bot {
+    private buttons = new Buttons()
 
     constructor() {
         this.startPolling()
@@ -45,12 +46,19 @@ class Bot {
     startPolling = async() => {
         const bot = new Telegraf<SceneContextMessageUpdate>(process.env.BOT_TOKEN as string);
 
+        const stage = new Stage (
+            [
+                loginScene,
+                orderScene,
+                sendOrdersScene
+            ]
+        );
+
         bot.start((ctx: any) => {
             try {
                 if (ctx.chat.type == 'private') {
                     ctx.reply(`Здравствуйте, ${ctx.chat.first_name}`, 
-                    Markup.keyboard(buttons.SET_AUTH)
-                    .resize()
+                        this.buttons.SET_AUTH()
                     );
                 } else {
                     ctx.reply(`Бот запущен в группе - ${ctx.chat.id}`)
@@ -67,9 +75,8 @@ class Bot {
         bot.hears(Action.BACK, (ctx: any) => {
             ctx.scene.leave();
             ctx.reply(`Здравствуйте, ${ctx.chat.first_name}`, 
-                Markup.keyboard(buttons.SET_AUTH)
-                .resize()
-                );
+                this.buttons.SET_AUTH()
+            );
         })
 
         bot.hears(Action.SEND_ORDER_FOR_SELLERS, (ctx: any) => {
@@ -85,15 +92,9 @@ class Bot {
             await ctx.reply('Команда разработчиков состоит из двух человек\nЕсли увидите ошибки, пишите сюда: help@mail.ru\n\nДанный бот является посредником между покупателем и продавцом\n\n');
         })
 
-        bot.hears(Action.ORDERS, (ctx: any) => {
-            ctx.reply('Просматриваю заказы. . .',
-            Markup.keyboard(buttons.ORDERS)
-            .resize())
-        })
-
         bot.hears(Action.MAIN_MENU, (ctx: any) => {
             ctx.reply('Главное меню',
-            Markup.keyboard(buttons.MAIN_MENU)
+            Markup.keyboard(this.buttons.MAIN_MENU())
             .resize())
         })
 
@@ -104,7 +105,7 @@ class Bot {
 
         bot.hears(Action.BUTTON_MAIN_MENU, (ctx: any) => {
             ctx.reply('Привет дружище', 
-            Markup.keyboard(buttons.MAIN_MENU)
+            Markup.keyboard(this.buttons.MAIN_MENU())
             .resize());
             return ctx.scene.leave()
         })
@@ -159,14 +160,6 @@ class Bot {
                 ]
             ))
         })
-
-        const stage = new Stage (
-            [
-                loginScene,
-                orderScene,
-                sendOrdersScene
-            ]
-        );
 
         async function sendOrderByQuery(ctx: any, chatId: number) {
             let html;
