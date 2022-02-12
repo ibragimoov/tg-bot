@@ -210,7 +210,6 @@ bot.action('✔️ Принять', ctx => {
     let user_id = msg.substring(msg.indexOf('-') + 1)
     let order_id = msg.substring(msg.indexOf('+') + 1)
 
-    // if (ctx.from.id == 258752149)
     ctx.answerCbQuery('Заказ принят')
     ctx.telegram.sendMessage(user_id, `Обновляю статус заказов. . .\nТорговец принял ваш заказ №${order_id}`,
     Markup.inlineKeyboard(
