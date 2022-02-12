@@ -2,22 +2,21 @@ import { Telegraf, Markup, session, Stage } from "telegraf";
 import { SceneContextMessageUpdate } from "telegraf/typings/stage";
 import dotenv from 'dotenv';
 import procces from 'process';
-// import Order from "./models/order.model.js";
-// import Product from "./models/products.model.js";
-// import Users from "./models/user.model.js";
+import { Order } from "./entities/order.entity";
+import { Product } from "./entities/product.entity";
+import { User } from "./entities/user.entity";
 import { Buttons } from "./keyboard/buttons";
-import { Action } from "./constants/actions.js";
-// import loginScene from './controllers/login.controller.js'
+import { Action } from "./constants/actions";
+import loginScene from './controllers/login.controller'
 // import orderScene from './controllers/order.controller.js';
 // import sendOrdersScene from './controllers/sendOrders.controller.js'
 import moment from "moment";
-import typeorm, { ConnectionOptions } from "typeorm";
+import typeorm, { ConnectionOptions, createConnection } from "typeorm";
 
 dotenv.config();
 
 const connect = () => {
     const options: ConnectionOptions = {
-        name: "adelace",
         type: "mongodb",
         url: procces.env.DB_URL,
         useNewUrlParser: true,
@@ -27,11 +26,11 @@ const connect = () => {
         entities: [
             Order,
             Product,
-            Users
+            User
         ],
     }
 
-    return typeorm.createConnection(options)
+    return createConnection(options)
   }
 
 class Bot {
@@ -49,8 +48,8 @@ class Bot {
         const stage = new Stage (
             [
                 loginScene,
-                orderScene,
-                sendOrdersScene
+                // orderScene,
+                // sendOrdersScene
             ]
         );
 
@@ -110,41 +109,41 @@ class Bot {
             return ctx.scene.leave()
         })
 
-        bot.hears(/c/, async (ctx: any) => {
-            let orderId = ctx.message.text;
-            orderId = orderId.substring(2, 5);
-            const productRep = typeorm.getMongoRepository(Product, 'adelace')
-            if (ctx.chat.id > 0) {
-                sendProductByQuery(ctx, orderId)
-            }
+        // bot.hears(/c/, async (ctx: any) => {
+        //     let orderId = ctx.message.text;
+        //     orderId = orderId.substring(2, 5);
+        //     const productRep = typeorm.getMongoRepository(Product, 'adelace')
+        //     if (ctx.chat.id > 0) {
+        //         sendProductByQuery(ctx, orderId)
+        //     }
 
-            if (ctx.chat.id < 0) {
-                let html;
-                productRep.find({orderId: Number(orderId)}).then(async product => {
-                    let count = 0,
-                    user_id;
-                    html = product.map ((f: any, _i) => {
-                        count++;
-                        user_id = f.chatId
-                        return `=========================\n 📦Товар: ${f.nameProduct}\n ⚖️Количество: ${f.value}`;
-                    }).join('\n');
+        //     if (ctx.chat.id < 0) {
+        //         let html;
+        //         productRep.find({orderId: Number(orderId)}).then(async product => {
+        //             let count = 0,
+        //             user_id;
+        //             html = product.map ((f: any, _i) => {
+        //                 count++;
+        //                 user_id = f.chatId
+        //                 return `=========================\n 📦Товар: ${f.nameProduct}\n ⚖️Количество: ${f.value}`;
+        //             }).join('\n');
 
-                    html += `\n=========================\n\nID клиента: -${user_id}\nID заказа: +${orderId}`
+        //             html += `\n=========================\n\nID клиента: -${user_id}\nID заказа: +${orderId}`
 
-                    return await ctx.telegram.sendMessage('-1001756421815', html,
-                    Markup.inlineKeyboard(
-                        [
-                            [
-                                {text: '✔️ Принять', callback_data: '✔️ Принять'}, {text: '❌ Отменить', callback_data: '❌ Отменить'}
-                            ],
-                            [
-                                {text: '📦 Готов к выдаче', callback_data: '📦 Готов к выдаче'}
-                            ]
-                        ]
-                    ))
-                });
-            }
-        })
+        //             return await ctx.telegram.sendMessage('-1001756421815', html,
+        //             Markup.inlineKeyboard(
+        //                 [
+        //                     [
+        //                         {text: '✔️ Принять', callback_data: '✔️ Принять'}, {text: '❌ Отменить', callback_data: '❌ Отменить'}
+        //                     ],
+        //                     [
+        //                         {text: '📦 Готов к выдаче', callback_data: '📦 Готов к выдаче'}
+        //                     ]
+        //                 ]
+        //             ))
+        //         });
+        //     }
+        // })
 
         bot.hears(/d/, async (ctx: any) => {
             let orderId = ctx.message.text;
