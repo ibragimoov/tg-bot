@@ -19,7 +19,7 @@ const sendOrdersScene = new Scenes.WizardScene('sendOrdersScene',
                 return ctx.scene.leave();
             }
             else {
-                orderRep.find({chatId: ctx.from.id, status: 'Новый'}).then(async orders => {
+                orderRep.find({chatId: ctx.from.id, $or: [{status: 'Новый', status: 'В обработке'}]}).then(async orders => {
                     let count = 0;
                     html = orders.map ((f, i) => {
                         count++;

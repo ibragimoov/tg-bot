@@ -209,43 +209,33 @@ bot.action('✔️ Принять', ctx => {
     const msg = ctx.callbackQuery.message.text
     let user_id = msg.substring(msg.indexOf('-') + 1)
     let order_id = msg.substring(msg.indexOf('+') + 1)
+
+    // if (ctx.from.id == 258752149)
+    ctx.answerCbQuery('Заказ принят')
+    ctx.telegram.sendMessage(user_id, `Обновляю статус заказов. . .\nТорговец принял ваш заказ №${order_id}`,
+    Markup.inlineKeyboard(
+        [
+            {text: 'Окей, принял!', callback_data: 'Окей, принял!'}
+        ]
+    ))
+
+    orderRep.updateMany({orderId: Number(order_id)},
+        {
+            $set: {
+                status: 'В обработке',
+                updatedAt: new Date()
+            }
+        })
     
-    if (ctx.from.id == 258752149) {
-        ctx.answerCbQuery('Заказ принят')
-        ctx.telegram.sendMessage(user_id, `Обновляю статус заказов. . .\nТорговец принял ваш заказ №${order_id}`,
-        Markup.inlineKeyboard(
-            [
-                {text: 'Окей, принял!', callback_data: 'Окей, принял!'}
-            ]
-        ))
-
-        orderRep.updateMany({orderId: Number(order_id)},
-            {
-                $set: {
-                    status: 'В обработке',
-                    updatedAt: new Date()
-                }
-            })
-        
-        ctx.pinChatMessage(ctx.callbackQuery.message.message_id)
-
-    } else {
-        ctx.answerCbQuery('Ты не торговец', ctx.from.id)
-        ctx.reply(`${ctx.from.first_name}, Ты не торговец`)
-    }
+    ctx.pinChatMessage(ctx.callbackQuery.message.message_id)
 })
 
 bot.action('❌ Отменить', ctx => {
     const msg = ctx.callbackQuery.message.text
     const user_id = msg.substring(msg.indexOf('-') + 1)
 
-    if (ctx.from.id == 258752149) {
-        ctx.answerCbQuery('Заказ отменён')
-        ctx.telegram.sendMessage(user_id, 'Торговец отменил ваш заказ')
-    } else {
-        ctx.answerCbQuery('Ты не торговец', ctx.from.id)
-        ctx.reply(`${ctx.from.first_name}, Ты не торговец`)
-    }
+    ctx.answerCbQuery('Заказ отменён')
+    ctx.telegram.sendMessage(user_id, 'Торговец отменил ваш заказ')
 })
 
 bot.action('📦 Готов к выдаче', ctx => {
@@ -253,23 +243,18 @@ bot.action('📦 Готов к выдаче', ctx => {
     const msg = ctx.callbackQuery.message.text
     let user_id = msg.substring(msg.indexOf('-') + 1)
     let order_id = msg.substring(msg.indexOf('+') + 1)
-    
-    if (ctx.from.id == 258752149) {
-        ctx.answerCbQuery('Заказ готов к выдаче')
-        ctx.telegram.sendMessage(user_id, 'Торговец готов выдать товар\nОбновляю статус заказов. . .')
 
-        orderRep.updateMany({orderId: Number(order_id)},
-            {
-                $set: {
-                    status: 'Готов к выдаче',
-                    updatedAt: new Date()
-                }
-            })
 
-    } else {
-        ctx.answerCbQuery('Ты не торговец', ctx.from.id)
-        ctx.reply(`${ctx.from.first_name}, Ты не торговец`)
-    }
+    ctx.answerCbQuery('Заказ готов к выдаче')
+    ctx.telegram.sendMessage(user_id, 'Торговец готов выдать товар\nОбновляю статус заказов. . .')
+
+    orderRep.updateMany({orderId: Number(order_id)},
+        {
+            $set: {
+                status: 'Готов к выдаче',
+                updatedAt: new Date()
+            }
+        })
 })
 
 bot.action('Да, удалить', ctx => {
