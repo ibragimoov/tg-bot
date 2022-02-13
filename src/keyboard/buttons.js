@@ -9,7 +9,7 @@ export const buttons = {
         [Action.BACK]
     ],
     MAIN_MENU: [
-        [Action.SEND_ORDER_FOR_SELLERS],
+        // [Action.SEND_ORDER_FOR_SELLERS],
         [Action.MAKE_ORDER, Action.VIEW_ORDERS],
         [Action.FAQ]
     ],

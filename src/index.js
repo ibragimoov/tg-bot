@@ -9,7 +9,6 @@ import { buttons } from "./keyboard/buttons.js";
 import { Action } from "./constants/actions.js";
 import loginScene from './controllers/login.controller.js'
 import orderScene from './controllers/order.controller.js';
-import sendOrdersScene from './controllers/sendOrders.controller.js'
 import moment from "moment";
 import typeorm from "typeorm";
 
@@ -42,7 +41,6 @@ const stage = new Scenes.Stage(
     [
         loginScene,
         orderScene,
-        sendOrdersScene
     ]
 );
 
@@ -134,7 +132,7 @@ bot.hears(/c/, async ctx => {
 
             html += `\n=========================\n\nID клиента: -${user_id}\nID заказа: +${orderId}`
 
-            return await ctx.telegram.sendMessage('-1001756421815', html,
+            return await ctx.telegram.sendMessage('-1001723689252', html,
             Markup.inlineKeyboard(
                 [
                     [
@@ -229,12 +227,59 @@ bot.action('✔️ Принять', ctx => {
     ctx.pinChatMessage(ctx.callbackQuery.message.message_id)
 })
 
+bot.action('denyByValue', ctx => {
+    const orderRep = typeorm.getMongoRepository(Order, "adelace")
+    const msg = ctx.callbackQuery.message.text
+    const user_id = msg.substring(msg.indexOf('-') + 1)
+    const order_id = msg.substring(msg.indexOf('+') + 1)
+
+    orderRep.updateMany({orderId: Number(order_id)},
+        {
+            $set: {
+                status: 'Отменён',
+                updatedAt: new Date()
+            }
+        })
+
+    ctx.answerCbQuery('Заказ отменён')
+    ctx.telegram.sendMessage(user_id, 'Продавец отменил ваш заказ по причине: "Некорректное кол-во товара"')
+})
+
+bot.action('denyByName', ctx => {
+    const orderRep = typeorm.getMongoRepository(Order, "adelace")
+    const msg = ctx.callbackQuery.message.text
+    const order_id = msg.substring(msg.indexOf('+') + 1)
+    const user_id = msg.substring(msg.indexOf('-') + 1)
+
+    orderRep.updateMany({orderId: Number(order_id)},
+        {
+            $set: {
+                status: 'Отменён',
+                updatedAt: new Date()
+            }
+        })
+
+    ctx.answerCbQuery('Заказ отменён')
+    ctx.telegram.sendMessage(user_id, 'Продавец отменил ваш заказ по причине: "Некорректное название товара"')
+})
+
 bot.action('❌ Отменить', ctx => {
     const msg = ctx.callbackQuery.message.text
     const user_id = msg.substring(msg.indexOf('-') + 1)
 
+    ctx.reply(`Выберите причину отмены заказа\n\nЗаказчик:\nID пользователя: -${user_id}`,
+    Markup.inlineKeyboard(
+        [
+            [
+                {text: 'Некорректное кол-во товара', callback_data: 'denyByValue'}
+            ],
+            [
+                {text: 'Некорректное название товара', callback_data: 'denyByName'}
+            ]
+        ]
+    ))
+
     ctx.answerCbQuery('Заказ отменён')
-    ctx.telegram.sendMessage(user_id, 'Торговец отменил ваш заказ')
 })
 
 bot.action('📦 Готов к выдаче', ctx => {
@@ -242,7 +287,6 @@ bot.action('📦 Готов к выдаче', ctx => {
     const msg = ctx.callbackQuery.message.text
     let user_id = msg.substring(msg.indexOf('-') + 1)
     let order_id = msg.substring(msg.indexOf('+') + 1)
-
 
     ctx.answerCbQuery('Заказ готов к выдаче')
     ctx.telegram.sendMessage(user_id, 'Торговец готов выдать товар\nОбновляю статус заказов. . .')
