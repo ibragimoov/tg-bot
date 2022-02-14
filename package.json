@@ -18,7 +18,7 @@
     "mongo": "^0.1.0",
     "mongodb": "^3.6.5",
     "mongoose": "^6.0.14",
-    "telegraf": "^3.39.0",
+    "telegraf": "^3.21.2",
     "ts-node": "^10.5.0",
     "typeorm": "^0.2.41",
     "typescript": "^4.4.4",

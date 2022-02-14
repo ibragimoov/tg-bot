@@ -1,5 +1,5 @@
-import { Telegraf, Markup, session, Stage } from "telegraf";
-import { SceneContextMessageUpdate } from "telegraf/typings/stage";
+import { Telegraf, Markup, session, Stage} from "telegraf";
+import { SceneContextMessageUpdate } from 'telegraf/typings/stage'
 import dotenv from 'dotenv';
 import procces from 'process';
 import { Order } from "./entities/order.entity";
@@ -7,7 +7,7 @@ import { Product } from "./entities/product.entity";
 import { User } from "./entities/user.entity";
 import { Buttons } from "./keyboard/buttons";
 import { Action } from "./constants/actions";
-import loginScene from './controllers/login.controller'
+import { LoginController } from './controllers/login.controller'
 // import orderScene from './controllers/order.controller.js';
 // import sendOrdersScene from './controllers/sendOrders.controller.js'
 import moment from "moment";
@@ -34,6 +34,7 @@ const connect = () => {
   }
 
 class Bot {
+    private loginController = new LoginController()
     private buttons = new Buttons()
 
     constructor() {
@@ -45,6 +46,8 @@ class Bot {
     startPolling = async() => {
         const bot = new Telegraf<SceneContextMessageUpdate>(process.env.BOT_TOKEN as string);
 
+        const loginScene = this.loginController.login()
+
         const stage = new Stage (
             [
                 loginScene,
@@ -52,6 +55,9 @@ class Bot {
                 // sendOrdersScene
             ]
         );
+
+        bot.use(session());
+        bot.use(stage.middleware())
 
         bot.start((ctx: any) => {
             try {
@@ -289,9 +295,6 @@ class Bot {
             let order_id = msg.substring(msg.indexOf('№') + 1)
             ctx.telegram.sendMessage('-1001756421815', `Заказчик: ${ctx.chat.first_name}\nПринял заказ №${order_id}`)
         })
-
-        bot.use(session());
-        bot.use(stage.middleware())
 
         bot.help((ctx) => ctx.reply('Send me a sticker'));
         bot.on('sticker', (ctx) => ctx.reply('👍'));
